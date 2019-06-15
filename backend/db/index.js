@@ -1,10 +1,8 @@
-const { initDb, getDb } = require('./mysql-db');
-const personDb = require('./person-db');
-
-
+const { initDb, getDb } = require('./mysql-db')
+const personDb = require('./person-db')
 
 module.exports = {
-	initDb,
-	getDb,
-	personDb
+  initDb,
+  getDb,
+  personDb
 }

@@ -1,6 +1,5 @@
-const peopleController = require('./people-controller');
-
+const peopleController = require('./people-controller')
 
 module.exports = {
-	peopleController
+  peopleController
 }
