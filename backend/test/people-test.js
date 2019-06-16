@@ -1,0 +1,163 @@
+
+process.env.NODE_ENV = 'test'
+
+
+const chai = require('chai')
+const chaiHttp = require('chai-http')
+const expect = chai.expect
+
+const { peopleService } = require('../services')
+const server = require('../server')
+const peopleJson = require('./people.json').peopleJson
+
+
+chai.use(chaiHttp)
+
+describe('People', () => {
+  before(async function () {
+    await peopleService.removeAllPeople()
+  })
+  
+
+  describe('/GET all people when empty', () => {
+    it('it should get an empty array', async function () {
+      try{
+        let res = await chai.request(server).get('/api/people')
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body).to.be.an('array')
+        expect(res.body).to.have.lengthOf(0)
+      } catch(err) {
+        console.log(err)
+      }
+    })
+  })
+
+  describe('/GET all people', () => {
+    before(async function () {
+      for (person in peopleJson) {
+        await peopleService.createPerson(peopleJson[person])
+      }
+    })
+
+    after(async function () {
+      await peopleService.removeAllPeople()
+    })
+
+    it('it should get three people', async function () {
+      try{
+        let res = await chai.request(server).get('/api/people')
+        //console.log(res)
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body).to.be.an('array')
+        expect(res.body).to.have.lengthOf(3)
+      } catch(err) {
+        console.log(err)
+      }
+    })
+  })
+
+  describe('/GET one person', () => {
+    before(async function () {
+      for (person in peopleJson) {
+        await peopleService.createPerson(peopleJson[person])
+      }
+    })
+
+    after(async function () {
+      await peopleService.removeAllPeople()
+    })
+
+    it('it should get one person', async function () {
+      let personId = 1
+      try{
+        let res = await chai.request(server).get('/api/people/' + personId)
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body).to.be.a('object')
+        expect(res.body).to.have.property('personId', 1)
+        expect(res.body).to.have.property('name', 'TestName1')
+        expect(res.body).to.have.property('company', 'TestCompany1')
+        expect(res.body).to.have.property('job', 'TestJob1')
+        expect(res.body).to.have.property('salary', 1)
+      } catch(err) {
+        console.log(err)
+      }
+    })
+  })
+
+
+  describe('/POST person', () => {
+    afterEach(async function () {
+      await peopleService.removeAllPeople()
+    })
+
+    it('it should post a new person', async function () {
+      let testPerson = peopleJson.testPersonOne
+      try {
+        let res = await chai.request(server).post('/api/people').send(testPerson)
+        expect(res).to.have.status(201)
+        expect(res).to.be.json
+        expect(res).to.have.header('Content-Location', '/api/people/1')
+        expect(res.body).to.be.a('object')
+        expect(res.body).to.have.property('personId', 1)
+        expect(res.body).to.have.property('name', 'TestName1')
+        expect(res.body).to.have.property('company', 'TestCompany1')
+        expect(res.body).to.have.property('job', 'TestJob1')
+        expect(res.body).to.have.property('salary', 1)
+      } catch(err) {
+        console.log(err)
+      }
+    })
+  })
+
+  describe('/PUT person', () => {
+    beforeEach(async function () {
+      let testPerson = peopleJson.testPersonOne
+      let results = await peopleService.createPerson(testPerson)
+      this.postedPerson = results.person
+    })
+    afterEach(async function () {
+      await peopleService.removeAllPeople()
+    })
+
+    it('it should update a person', async function () {
+      let personId = this.postedPerson.personId
+      let alteredInfo = peopleJson.testPersonTwo
+      try {
+        let res = await chai.request(server).put('/api/people/' + personId).send(alteredInfo)
+        expect(res).to.have.status(204)
+        expect(res).to.have.header('Content-Location', '/api/people/1')
+        expect(res.body).to.be.empty
+      } catch(err) {
+        console.log(err)
+      }
+    })
+  })
+
+  describe('/DELETE person', () => {
+    before(async function () {
+      for (person in peopleJson) {
+        await peopleService.createPerson(person)
+      }
+    })
+
+    after(async function () {
+      await peopleService.removeAllPeople()
+    })
+
+    it('it should delete a person', async function () {
+      let personId = 1
+      try {
+        let res = await chai.request(server).delete('/api/people/' + personId)
+        expect(res).to.have.status(200)
+        expect(res.body).to.have.property('message', 'Person deleted')
+      } catch(err) {
+        console.log(err)
+      }
+    })
+  })
+
+
+})

@@ -1,0 +1,22 @@
+{
+	"peopleJson": {
+		"testPersonOne" : {
+		        "name": "TestName1",
+		        "company": "TestCompany1",
+		        "job": "TestJob1",
+		        "salary": 1
+	    	},
+	    "testPersonTwo" :	{
+		        "name": "TestName2",
+		        "company": "TestCompany2",
+		        "job": "TestJob2",
+		        "salary": 2
+	    	},
+	    "testPersonThree" :	{
+		        "name": "TestName3",
+		        "company": "TestCompany3",
+		        "job": "TestJob3",
+		        "salary": 3
+	    	}
+	}
+}

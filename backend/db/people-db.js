@@ -38,10 +38,10 @@ function getPerson (personId) {
   })
 }
 
-const updatePerson = function (personId, personInfo) {
+function updatePerson (personId, personInfo) {
   var database = getDb()
   var { name, company, job, salary } = personInfo
-  var statement = "UPDATE PEOPLE SET name = ?, company = ?, job = ?, salary = ? WHERE personId = ?"
+  var statement = "UPDATE People SET name = ?, company = ?, job = ?, salary = ? WHERE personId = ?"
   var values = [name, company, job, salary, personId]
   statement = mysql.format(statement, values)
 
@@ -58,7 +58,7 @@ const updatePerson = function (personId, personInfo) {
 function createPerson (personInfo) {
   var database = getDb()
   var { name, company, job, salary } = personInfo
-  var statement = "INSERT INTO PEOPLE (name, company, job, salary) VALUES (?, ?, ?, ?)"
+  var statement = "INSERT INTO People (name, company, job, salary) VALUES (?, ?, ?, ?)"
   var values = [name, company, job, salary]
   statement = mysql.format(statement, values)
 
@@ -72,10 +72,10 @@ function createPerson (personInfo) {
   })
 }
 
-const deletePerson = function (personId) {
+function deletePerson (personId) {
   var database = getDb()
   //TODO: must validate personId or else could delete all rows
-  var statement = "DELETE FROM PEOPLE where personId = ?"
+  var statement = "DELETE FROM People WHERE personId = ?"
   statement = mysql.format(statement, personId)
 
   return new Promise( (resolve, reject) => {
@@ -83,14 +83,29 @@ const deletePerson = function (personId) {
       if (err) {
         return reject(err)
       }
-      resolve(results.insertId)
+      resolve(results.affectedRows)
     })
   })
 }
 
-const searchPeople = function (searchTerms, callback) {
+function searchPeople (searchTerms, callback) {
 
 }
+
+function removeAllPeople () {
+  var database = getDb()
+  var statement = "TRUNCATE TABLE People"
+
+  return new Promise( (resolve, reject) => {
+    database.query(statement, function (err, results) {
+      if (err) {
+        return reject(err)
+      }
+      resolve(results.affectedRows)
+    })
+  })
+}
+
 
 function errorHandler (err) {
 	console.log(err)
@@ -102,5 +117,6 @@ module.exports = {
   updatePerson,
   createPerson,
   deletePerson,
-  searchPeople
+  searchPeople, 
+  removeAllPeople
 }

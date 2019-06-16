@@ -3,7 +3,9 @@ const bodyParser = require('body-parser')
 const routes = require('./routes')
 const { initDb } = require('./db')
 const path = require('path')
-const port = 3000
+
+// check PORT environment variable, otherwise 3000
+const port = process.env.PORT || 3000
 
 const app = express()
 initDb(function (err) {
@@ -14,9 +16,14 @@ initDb(function (err) {
   }
 })
 
+//TODO use morgan if not test
+
 app.use(bodyParser.json())
 app.use('/', routes)
 
 app.listen(port, function () {
   console.log('Server listening at http://localhost:' + port)
 })
+
+// for use in testing
+module.exports = app
