@@ -1,70 +1,104 @@
 const { peopleService } = require('../services')
 
-const getPeopleCtrl = function (req, res) {
-  peopleService.getPeopleService(function (err, results) {
-    if (err) {
-      console.log(err)
-      res.sendStatus(400) // BAD REQUEST
-    }
+async function getPeopleCtrl (req, res) {
+  try {
+    const results = await peopleService.getPeople()
     console.log(results)
     res.status(200).json(results)
-  })
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+    }
 }
 
-const getPersonCtrl = function (req, res) {
+async function getPersonCtrl (req, res) {
   var personId = req.params.personId
-  console.log("person id: " + personId)
-  peopleService.getPersonService(personId, function (err, results) {
-    if (err) {
-      console.log(err)
-      res.sendStatus(404) // NOT FOUND
-    }
+  try {
+    const results = await peopleService.getPerson(personId)
     console.log(results)
+    if (results.length == 0) {
+      return res.sendStatus(404)
+    } 
     res.status(200).json(results)
-  })
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+    }
 }
 
-const updatePersonCtrl = function (req, res) {
+async function updatePersonCtrl (req, res) {
   var personId = req.params.personId
-  var updates = req.body
-  peopleService.getPersonService(personId, updates, function (err, results) {
-    if (err) {
-      console.log(err)
-      // TODO: status 201 for created
-      res.sendStatus(204) // No Content
+  var personInfo = req.body
+  try {
+    const results = await peopleService.updatePerson(personId, personInfo)
+    console.log(results)
+    if (results.length != 0) {
+      // Set Content-Location header with location of
+      // newly created Person
+      res.location('/people/' + results.personId)
+      return res.status(201).json(results) // CREATED
     }
-    let output = JSON.parse(JSON.stringify(results))
-    res.status(200).json(output)
-  })
+    // Set Content-Location of updated person, no person created
+    res.location('/people/' + personId)
+    res.sendStatus(200) // OK, updated
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+  }
 }
 
-const createPersonCtrl = function (req, res) {
-  var person = req.body
-  peopleService.getPersonService(person, function (err, results) {
-    if (err) {
-      console.log(err)
-      res.sendStatus(204) // No content
-    }
-    // must return entity in body
-    let output = JSON.parse(JSON.stringify(results))
-    res.status(201).json(output)
-  })
-}
-
-const deletePersonCtrl = function (req, res) {
+/*async function patchPersonCtrl (req, res) {
   var personId = req.params.personId
-  peopleService.getPersonService(personId, function (err, results) {
-    if (err) {
-      console.log(err)
-      // TODO: status 202 for queued
-      res.sendStatus(204) // No Content
+  var personInfo = req.body
+  try {
+    const results = await peopleService.patchPerson(personId, personInfo)
+    console.log(results)
+    if (results.length != 0) {
+      // Set Content-Location header with location of
+      // newly created Person
+      res.location('/people/' + results.personId)
+      return res.status(201).json(results) // CREATED
     }
-    // let output = JSON.parse(JSON.stringify(results));
-    res.sendStatus(204) // No content, action performed but no entity sent back
-  })
+    // Set Content-Location of updated person, no person created
+    res.location('/people/' + personId)
+    res.sendStatus(200) // OK, updated
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+  }
+}*/
+
+async function createPersonCtrl (req, res) {
+  var personInfo = req.body
+  try {
+    const results = await peopleService.createPerson(personInfo)
+    console.log(results)
+    if (results.created) {
+      res.location('/people/' + results.personId)
+      return res.status(201).json(results) //201 CREATED
+    }
+    res.sendStatus(400) // BAD REQUEST
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+  }
+
 }
 
-const searchPeopleCtrl = function (req, res) {
+async function deletePersonCtrl (req, res) {
+  var personId = req.params.personId
+  try {
+    const results = await peopleService.deletePerson(personId)
+    console.log(results)
+    res.status(204).json(results) //204 No Content returned
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+  }
+
+}
+
+async function searchPeopleCtrl (req, res) {
 
 }
 
