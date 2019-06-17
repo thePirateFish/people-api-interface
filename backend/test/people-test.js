@@ -139,7 +139,7 @@ describe('People', () => {
   describe('/DELETE person', () => {
     before(async function () {
       for (person in peopleJson) {
-        await peopleService.createPerson(person)
+        await peopleService.createPerson(peopleJson[person])
       }
     })
 
@@ -153,6 +153,52 @@ describe('People', () => {
         let res = await chai.request(server).delete('/api/people/' + personId)
         expect(res).to.have.status(200)
         expect(res.body).to.have.property('message', 'Person deleted')
+      } catch(err) {
+        console.log(err)
+      }
+    })
+  })
+
+  describe('/GET search query', () => {
+    before(async function () {
+      for (person in peopleJson) {
+        await peopleService.createPerson(peopleJson[person])
+      }
+    })
+
+    after(async function () {
+      await peopleService.removeAllPeople()
+    })
+
+    it('it should return two people from search', async function () {
+      let queryString = "?company=TestCompany2&job=TestJob3"
+      try {
+        let res = await chai.request(server).get('/api/people/search' + queryString)
+        expect(res).to.have.status(200)
+        expect(res.body).to.be.an('array')
+      } catch(err) {
+        console.log(err)
+      }
+    })
+
+    it('it should return NOT FOUND with valid query params', async function () {
+      let queryString = "?company=testcompany7&job=testjob8"
+      try {
+        let res = await chai.request(server).get('/api/people/search' + queryString)
+        expect(res).to.have.status(200)
+        expect(res.body).to.be.empty
+      } catch(err) {
+        console.log(err)
+      }
+    })
+
+    //TODO validate params
+    it('it should return BAD REQUEST with invalid query params', async function () {
+      let queryString = "?food=Chicken&shoes=Nike"
+      try {
+        let res = await chai.request(server).get('/api/people/search' + queryString)
+        expect(res).to.have.status(400) //BAD REQUEST
+        expect(res.body).to.be.empty
       } catch(err) {
         console.log(err)
       }

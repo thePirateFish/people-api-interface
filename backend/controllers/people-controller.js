@@ -103,8 +103,32 @@ async function deletePersonCtrl (req, res) {
 
 }
 
-async function searchPeopleCtrl (req, res) {
+async function searchByParamsCtrl(req, res) {
+  try {
+    const results = await peopleService.searchByAttributes(req.query)
+    //console.log(results)
+    if (results.length != 0) {
+      return res.status(200).json(results) //OK, returning array
+    } else {
+      res.sendStatus(200) //OK, but no results in body
+    }
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+  }
 
+}
+
+async function searchPeopleCtrl (req, res) {
+  var searchTerm = req.body
+  try {
+    const results = await peopleService.searchPeople(searchTerm)
+    //console.log(results)
+    res.status(200).json(results)
+  } catch(err) {
+    console.log(err);
+    res.sendStatus(400) // BAD REQUEST
+    }
 }
 
 module.exports = {
@@ -113,5 +137,6 @@ module.exports = {
   updatePersonCtrl,
   createPersonCtrl,
   deletePersonCtrl,
+  searchByParamsCtrl,
   searchPeopleCtrl
 }

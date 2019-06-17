@@ -68,6 +68,22 @@ async function deletePerson (personId) {
   }
 }
 
+async function searchByAttributes(attributes) {
+  try {
+    let results = await peopleDb.searchByFields(attributes)
+    if (results) {
+      results = formatResults(results)
+      return results
+    } else {
+      results = []
+      return results
+    } 
+  } catch (err) {
+    //TODO: Error handling
+    console.log(err)
+  }
+}
+
 async function searchPeople (searchTerms) {
   try {
     let results = await peopleDb.searchPeople(searchTerms)
@@ -100,6 +116,7 @@ module.exports = {
   updatePerson,
   createPerson,
   deletePerson,
+  searchByAttributes,
   searchPeople,
   removeAllPeople
 }

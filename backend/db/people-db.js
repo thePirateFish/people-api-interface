@@ -88,8 +88,47 @@ function deletePerson (personId) {
   })
 }
 
-function searchPeople (searchTerms, callback) {
+function searchByFields (fields) {
+  //console.log(fields)
+  //console.log(typeof(fields))
+  //console.log(Object.keys(fields).length)
+  var len = Object.keys(fields).length
+  var fieldNames = Object.keys(fields)
+  escapedValues = []
+  var database = getDb()
+  var sql = "SELECT * FROM People WHERE"
+  for (var i=0; i < len; i++) {
+    sql = sql.concat(" ", fieldNames[i], "  = ?")
+    escapedValues.push(fields[fieldNames[i]])
+    if (i+1 != len) {sql = sql.concat(" OR")}
+  }
+  statement = mysql.format(sql, escapedValues)
+  //console.log(statement)
+  return new Promise( (resolve, reject) => {
+    database.query(statement, function (err, results) {
+      if (err) {
+        return reject(err)
+      }
+      resolve(results)
+    })
+  })
+}
 
+function searchPeople (searchTerm, callback) {
+  var database = getDb()
+  var statement = "SELECT * FROM People WHERE name LIKE ? OR company LIKE ? OR job LIKE ?"
+  var matcher = "%25" + searchTerm + "%25"
+  var values = [matcher, matcher, matcher]
+  statement = mysql.format(statement, values)
+
+  return new Promise( (resolve, reject) => {
+    database.query(statement, function (err, results) {
+      if (err) {
+        return reject(err)
+      }
+      resolve(results)
+    })
+  })
 }
 
 function removeAllPeople () {
@@ -117,6 +156,7 @@ module.exports = {
   updatePerson,
   createPerson,
   deletePerson,
+  searchByFields,
   searchPeople, 
   removeAllPeople
 }
