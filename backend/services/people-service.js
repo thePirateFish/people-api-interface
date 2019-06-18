@@ -2,9 +2,11 @@ const { peopleDb } = require('../db')
 
 async function getPeople () {
   try {
-    let results = await peopleDb.getPeople()
-    results = formatResults(results)
-    return results
+    var result = createResult()
+    let peopleArr = await peopleDb.getPeople()
+    peopleArr = formatResults(peopleArr)
+    result.contents = peopleArr
+    return result
   } catch (err) {
     //TODO: Error handling
     console.log(err)
@@ -12,30 +14,39 @@ async function getPeople () {
 }
 
 async function getPerson (personId) {
+  
   try {
-    let results = await peopleDb.getPerson(personId)
-    let resultsArr = formatResults(results)
-    var person = resultsArr.pop()
-    return person
+    var result = createResult()
+    let person = await peopleDb.getPerson(personId)
+    personArr = formatResults(person)
+    if (personArr.length == 0) {
+      result.meta.notFound = true
+      return result
+    }
+    person = personArr.pop()
+    result.contents = person
+    return result
   } catch (err) {
-    //TODO: Error handling
     console.log(err)
+    //TODO: Error handling
+    var errorResult = createResult()
+    errorResult.meta.error = true
+    return errorResult
   }
 }
 
 async function updatePerson (personId, personInfo) {
   try {
-    let affectedPeople = await peopleDb.updatePerson(personId, personInfo)
-    results = {}
-    
+    var result = createResult()
+    let affectedPeople = await peopleDb.updatePerson(personId, personInfo)    
     if (affectedPeople == 0) {
-      console.log("Creating new person")
       //TODO create person with personId parameter supplied
-      let results = await peopleDb.createPerson(personInfo)
+      let personId = await peopleDb.createPerson(personInfo)
+      let person = await getPerson(personId)
+      result.meta.created = true
+      result.contents = formatResults(person)
     }
-    // results.created will be set to true if created
-    //console.log(results)
-    return results
+    return result
   } catch (err) {
     //TODO: Error handling
     console.log(err)
@@ -44,12 +55,12 @@ async function updatePerson (personId, personInfo) {
 
 async function createPerson (personInfo) {
   try {
-    results = {}
+    var result = createResult()
     let personId = await peopleDb.createPerson(personInfo)
-    let person = await getPerson(personId)
-    results.person = person
-    results.created = true
-    return results
+    let personArr = await peopleDb.getPerson(personId)
+    result.contents = formatResults(personArr.pop())
+    result.meta.created = true
+    return result
   } catch (err) {
     //TODO: Error handling
     console.log(err)
@@ -59,9 +70,13 @@ async function createPerson (personInfo) {
 
 async function deletePerson (personId) {
   try {
+    var result = createResult()
     let affectedPeople = await peopleDb.deletePerson(personId)
     affectedPeople = formatResults(affectedPeople)
-    return affectedPeople
+    if (affectedPeople == 0) {
+      result.meta.invalid = true
+    }
+    return result
   } catch (err) {
     //TODO: Error handling
     console.log(err)
@@ -70,30 +85,25 @@ async function deletePerson (personId) {
 
 async function searchByAttributes(attributes) {
   try {
-    let results = await peopleDb.searchByFields(attributes)
-    if (results) {
-      results = formatResults(results)
-      return results
+    var result = createResult()
+    if (!validateInput(attributes)) {
+      result.meta.invalid = true
+      return result
+    }
+    
+    let people = await peopleDb.searchByFields(attributes)
+    if (people) {
+      result.contents = formatResults(people)
     } else {
-      results = []
-      return results
+      result.contents = []
     } 
+    return result
   } catch (err) {
     //TODO: Error handling
     console.log(err)
   }
 }
 
-async function searchPeople (searchTerms) {
-  try {
-    let results = await peopleDb.searchPeople(searchTerms)
-    results = formatResults(results)
-    return results
-  } catch (err) {
-    //TODO: Error handling
-    console.log(err)
-  }
-}
 
 async function removeAllPeople () {
   try {
@@ -104,6 +114,27 @@ async function removeAllPeople () {
     //TODO: Error handling
     console.log(err)
   }
+}
+
+const validateInput = function (personInfo) {
+  let validInputs = ['name', 'company', 'job', 'salary']
+  var fields = Object.keys(personInfo)
+  for (var i=0; i < fields.length; i++) {
+    if (validInputs.indexOf(fields[i].toLowerCase()) < 0) {
+      return false
+    }
+  }
+  return true
+}
+
+const createResult = function () {
+  var resultObject = {}
+  resultObject.contents = null
+  resultObject.meta = { created: false,
+                        notFound: false,
+                        invalid: false,
+                        error: false}
+  return resultObject
 }
 
 function formatResults(results) {
@@ -117,6 +148,5 @@ module.exports = {
   createPerson,
   deletePerson,
   searchByAttributes,
-  searchPeople,
   removeAllPeople
 }

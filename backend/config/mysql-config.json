@@ -4,6 +4,12 @@
 		"host": "localhost",
 		"user": "root",
 		"password": "password",
-		"database": "mydb"
-	}
+		"database": "apiDb"
+	},
+	"connection": {
+		"host": "localhost",
+		"user": "root",
+		"password": "password"
+	},
+	"dbName": "apiDb"
 }

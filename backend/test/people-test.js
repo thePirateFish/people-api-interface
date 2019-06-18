@@ -115,8 +115,8 @@ describe('People', () => {
   describe('/PUT person', () => {
     beforeEach(async function () {
       let testPerson = peopleJson.testPersonOne
-      let results = await peopleService.createPerson(testPerson)
-      this.postedPerson = results.person
+      let result = await peopleService.createPerson(testPerson)
+      this.postedPerson = result.contents
     })
     afterEach(async function () {
       await peopleService.removeAllPeople()
@@ -151,8 +151,8 @@ describe('People', () => {
       let personId = 1
       try {
         let res = await chai.request(server).delete('/api/people/' + personId)
-        expect(res).to.have.status(200)
-        expect(res.body).to.have.property('message', 'Person deleted')
+        expect(res).to.have.status(204)
+        //expect(res.body).to.have.property('message', 'Person deleted')
       } catch(err) {
         console.log(err)
       }

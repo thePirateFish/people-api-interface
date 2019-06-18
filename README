@@ -1,4 +1,21 @@
+API Reference:
 
+GET api/people
+Returns a JSON array of all people from the People table,
+including all fields (personId, name, company, job, salary)
+Response format: JSON Array
+
+
+GET api/people/:personId
+Response format: JSON
+Parameters:
+	personId (int): integer id of person
+
+GET api/people/search?attr=val9[&attr2=val2 ...]
+Searches all People for attributes that match the query parameters. Valid attribute parameters are 'name', 'company', 'job', and 'salary', and including
+invalid parameters will return a 400 (BAD REQUEST) response code. Otherwise, results are returned in a JSON array. If the search matches no results, returns
+an empty array. Valid requests return a 200 (OK) response code.
+Response format: JSON Array
 
 Resources:
 http://callbackhell.com/
