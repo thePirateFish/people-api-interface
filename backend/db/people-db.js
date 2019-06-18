@@ -25,7 +25,6 @@ function getPeople () {
 function getPerson (personId) {
   var database = getDb()
   var statement = "SELECT * FROM People WHERE personId = ?"
-  //var values = [personId]
   statement = mysql.format(statement, personId)
 
   return new Promise( (resolve, reject) => {
@@ -89,9 +88,6 @@ function deletePerson (personId) {
 }
 
 function searchByFields (fields) {
-  //console.log(fields)
-  //console.log(typeof(fields))
-  //console.log(Object.keys(fields).length)
   var len = Object.keys(fields).length
   var fieldNames = Object.keys(fields)
   escapedValues = []
@@ -103,7 +99,6 @@ function searchByFields (fields) {
     if (i+1 != len) {sql = sql.concat(" OR")}
   }
   statement = mysql.format(sql, escapedValues)
-  //console.log(statement)
   return new Promise( (resolve, reject) => {
     database.query(statement, function (err, results) {
       if (err) {

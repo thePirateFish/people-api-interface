@@ -8,8 +8,8 @@ async function getPeople () {
     result.contents = peopleArr
     return result
   } catch (err) {
-    //TODO: Error handling
     console.log(err)
+    return createErrorResult()
   }
 }
 
@@ -28,10 +28,7 @@ async function getPerson (personId) {
     return result
   } catch (err) {
     console.log(err)
-    //TODO: Error handling
-    var errorResult = createResult()
-    errorResult.meta.error = true
-    return errorResult
+    return createErrorResult()
   }
 }
 
@@ -46,10 +43,13 @@ async function updatePerson (personId, personInfo) {
       result.meta.created = true
       result.contents = formatResults(person)
     }
+    personArr = await peopleDb.getPerson(personId)
+    result.contents = personArr.pop()
+    result.meta.updated = true
     return result
   } catch (err) {
-    //TODO: Error handling
     console.log(err)
+    return createErrorResult()
   }
 }
 
@@ -62,8 +62,8 @@ async function createPerson (personInfo) {
     result.meta.created = true
     return result
   } catch (err) {
-    //TODO: Error handling
     console.log(err)
+    return createErrorResult()
   }
 }
 
@@ -78,8 +78,8 @@ async function deletePerson (personId) {
     }
     return result
   } catch (err) {
-    //TODO: Error handling
     console.log(err)
+    return createErrorResult()
   }
 }
 
@@ -90,7 +90,6 @@ async function searchByAttributes(attributes) {
       result.meta.invalid = true
       return result
     }
-    
     let people = await peopleDb.searchByFields(attributes)
     if (people) {
       result.contents = formatResults(people)
@@ -99,8 +98,8 @@ async function searchByAttributes(attributes) {
     } 
     return result
   } catch (err) {
-    //TODO: Error handling
     console.log(err)
+    return createErrorResult()
   }
 }
 
@@ -111,8 +110,8 @@ async function removeAllPeople () {
     results = formatResults(results)
     return results
   } catch (err) {
-    //TODO: Error handling
     console.log(err)
+    return createErrorResult()
   }
 }
 
@@ -133,9 +132,18 @@ const createResult = function () {
   resultObject.meta = { created: false,
                         notFound: false,
                         invalid: false,
-                        error: false}
+                        error: false,
+                        updated: false}
   return resultObject
 }
+
+const createErrorResult = function () {
+  var resultObject = createResult()
+  resultObject.error = true
+  return resultObject
+}
+
+
 
 function formatResults(results) {
   return JSON.parse(JSON.stringify(results))
