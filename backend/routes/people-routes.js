@@ -8,6 +8,4 @@ router.put('/people/:personId', peopleController.updatePersonCtrl)
 router.post('/people', peopleController.createPersonCtrl)
 router.delete('/people/:personId', peopleController.deletePersonCtrl)
 
-module.exports = [
-  router
-]
+module.exports = router

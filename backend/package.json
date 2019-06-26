@@ -2,10 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "mocha",
-    "dev": "NODE_ENV=test PORT=3000 nodemon server.js"
+    "test:watch": "NODE_ENV=test mocha --watch ./test ./",
+    "dev": "NODE_ENV=test PORT=3000 nodemon index.js"
   },
   "author": "",
   "license": "ISC",

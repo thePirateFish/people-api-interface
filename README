@@ -25,9 +25,11 @@ https://medium.com/@tkssharma/writing-neat-asynchronous-node-js-code-with-promis
 
 MySQL:
 https://www.npmjs.com/package/mysql
+https://www.npmjs.com/package/mysql
 
 Architecture:
 https://www.coreycleary.me/project-structure-for-an-express-rest-api-when-there-is-no-standard-way/
+https://expressjs.com/en/4x/api.html
 
 Testing:
 https://scotch.io/tutorials/test-a-node-restful-api-with-mocha-and-chai

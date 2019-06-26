@@ -1,0 +1,24 @@
+body {
+    background-color: #d6eafd
+}
+
+input {
+    padding: 10px 10px;
+    border: black;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+thead th {
+    border-bottom-color: black;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+th, td {
+    text-align: left;
+}
+
+table {
+    min-width: 350px;
+}

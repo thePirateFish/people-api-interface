@@ -1,28 +1,35 @@
 
 process.env.NODE_ENV = 'test'
-
-
+const port = process.env.PORT || 3000
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const expect = chai.expect
 
 const { peopleService } = require('../services')
-const server = require('../server')
+const app = require('../server')
 const peopleJson = require('./people.json').peopleJson
+
+// node http.Server object to use for closing connection
+var server
 
 
 chai.use(chaiHttp)
 
 describe('People', () => {
   before(async function () {
+    server = app.listen(port)
     await peopleService.removeAllPeople()
+  })
+
+  after(() => {
+    server.close()
   })
   
 
   describe('/GET all people when empty', () => {
-    it('it should get an empty array', async function () {
+    it('When no people are in the database, it should return an empty array', async function () {
       try{
-        let res = await chai.request(server).get('/api/people')
+        let res = await chai.request(app).get('/api/people')
         expect(res).to.have.status(200)
         expect(res).to.be.json
         expect(res.body).to.be.an('array')
@@ -46,7 +53,7 @@ describe('People', () => {
 
     it('it should get three people', async function () {
       try{
-        let res = await chai.request(server).get('/api/people')
+        let res = await chai.request(app).get('/api/people')
         //console.log(res)
         expect(res).to.have.status(200)
         expect(res).to.be.json
@@ -72,7 +79,7 @@ describe('People', () => {
     it('it should get one person', async function () {
       let personId = 1
       try{
-        let res = await chai.request(server).get('/api/people/' + personId)
+        let res = await chai.request(app).get('/api/people/' + personId)
         expect(res).to.have.status(200)
         expect(res).to.be.json
         expect(res.body).to.be.a('object')
@@ -96,7 +103,7 @@ describe('People', () => {
     it('it should post a new person', async function () {
       let testPerson = peopleJson.testPersonOne
       try {
-        let res = await chai.request(server).post('/api/people').send(testPerson)
+        let res = await chai.request(app).post('/api/people').send(testPerson)
         expect(res).to.have.status(201)
         expect(res).to.be.json
         expect(res).to.have.header('Content-Location', '/api/people/1')
@@ -126,7 +133,7 @@ describe('People', () => {
       let personId = this.postedPerson.personId
       let alteredInfo = peopleJson.testPersonTwo
       try {
-        let res = await chai.request(server).put('/api/people/' + personId).send(alteredInfo)
+        let res = await chai.request(app).put('/api/people/' + personId).send(alteredInfo)
         expect(res).to.have.status(204)
         expect(res).to.have.header('Content-Location', '/api/people/1')
         expect(res.body).to.be.empty
@@ -150,9 +157,8 @@ describe('People', () => {
     it('it should delete a person', async function () {
       let personId = 1
       try {
-        let res = await chai.request(server).delete('/api/people/' + personId)
+        let res = await chai.request(app).delete('/api/people/' + personId)
         expect(res).to.have.status(204)
-        //expect(res.body).to.have.property('message', 'Person deleted')
       } catch(err) {
         console.log(err)
       }
@@ -173,7 +179,7 @@ describe('People', () => {
     it('it should return two people from search', async function () {
       let queryString = "?company=TestCompany2&job=TestJob3"
       try {
-        let res = await chai.request(server).get('/api/people/search' + queryString)
+        let res = await chai.request(app).get('/api/people/search' + queryString)
         expect(res).to.have.status(200)
         expect(res.body).to.be.an('array')
       } catch(err) {
@@ -184,7 +190,7 @@ describe('People', () => {
     it('it should return NOT FOUND with valid query params', async function () {
       let queryString = "?company=testcompany7&job=testjob8"
       try {
-        let res = await chai.request(server).get('/api/people/search' + queryString)
+        let res = await chai.request(app).get('/api/people/search' + queryString)
         expect(res).to.have.status(200)
         expect(res.body).to.be.empty
       } catch(err) {
@@ -196,7 +202,7 @@ describe('People', () => {
     it('it should return BAD REQUEST with invalid query params', async function () {
       let queryString = "?food=Chicken&shoes=Nike"
       try {
-        let res = await chai.request(server).get('/api/people/search' + queryString)
+        let res = await chai.request(app).get('/api/people/search' + queryString)
         expect(res).to.have.status(400) //BAD REQUEST
         expect(res.body).to.be.empty
       } catch(err) {
